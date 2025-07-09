@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Project Completion Date Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary: #0072ff;
+        --secondary: #00c6ff;
+        --background: #f4f6f8;
+        --card-bg: #fff;
+        --text-color: #333;
+        --border: #e0e0e0;
+        --result-bg: #eef7ff;
+        --shadow: rgba(0, 0, 0, 0.05);
+      }
+      body.dark {
+        --background: #121212;
+        --card-bg: #1e1e1e;
+        --text-color: #ddd;
+        --border: #333;
+        --result-bg: #1b1b1b;
+        --shadow: rgba(255, 255, 255, 0.05);
+      }
+      * {
+        box-sizing: border-box;
+        transition: background 0.3s, color 0.3s;
+      }
+      body {
+        margin: 0;
+        font-family: "Roboto", sans-serif;
+        background-color: var(--background);
+        color: var(--text-color);
+      }
+      header {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 2rem;
+        position: relative;
+      }
+      #darkModeToggle {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: 2px solid white;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+      }
+      #darkModeToggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      main {
+        margin: 2rem;
+        display: grid;
+        grid-template-columns: 3fr 7fr;
+        gap: 2rem;
+      }
+      section,
+      aside {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 6px 12px var(--shadow);
+      }
+      h2,
+      h3 {
+        margin-top: 0;
+        color: var(--primary);
+        border-bottom: 2px solid var(--secondary);
+        padding-bottom: 0.5rem;
+        font-size: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+        font-weight: 500;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 0.25rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        background: var(--background);
+        color: var(--text-color);
+      }
+      button {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin: 0.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: opacity 0.3s, transform 0.2s;
+      }
+      button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+      .button-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 0.5rem;
+        text-align: left;
+      }
+      th {
+        background-color: var(--result-bg);
+      }
+      #results {
+        margin-top: 2rem;
+        background: var(--result-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px var(--shadow);
+      }
+      .result-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 1.1rem;
+        opacity: 1;
+        transition: opacity 0.5s;
+      }
+      .result-line.fade-out {
+        opacity: 0;
+      }
+      .result-label {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+      .result-value {
+        font-weight: bold;
+        color: var(--primary);
+      }
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        section,
+        aside {
+          margin-bottom: 1.5rem;
+        }
+      }
+      @media print {
+        header,
+        aside,
+        button,
+        input[type="file"],
+        #darkModeToggle {
+          display: none !important;
+        }
+        input {
+          font-size: 12pt;
+        }
+        section {
+          font-size: 12pt;
+        }
+      }
+      .inline-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .inline-label input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+      }      
+    </style>
+  </head>
+  <body>
+    <header>
+      🚀 Project Completion Date Calculator
+      <button id="darkModeToggle" onclick="toggleDarkMode()">🌙 Toggle</button>
+    </header>
+
+    <main>
+      <aside>
+        <h2>📅 Holiday Calendar</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="holidaysBody"></tbody>
+        </table>
+        <div class="button-container">
+          <button type="button" onclick="addHolidayRow()">+ Add Holiday</button>
+          <button type="button" onclick="fetchIndianHolidays()">Update Holidays</button>
+          <!-- <button type="button" onclick="exportHolidays()">⬇ Export</button> -->
+          <button type="button" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+          <input type="file" id="importFile" onchange="importHolidays(event)" style="display: none" />
+        </div>
+      </aside>
+
+      <section>
+        <h2>✨ Input Parameters</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem">
+          <div style="flex: 1; min-width: 250px">
+            <label>Project Name</label>
+            <input type="text" id="projectName" />
+            <label>Project Start Date</label>
+            <input type="date" id="startDate" />
+            <label>Total Estimated Effort (hrs)</label>
+            <input type="number" id="effort" value="180" />
+            <label>Daily Working Hours</label>
+            <input type="number" id="dailyHours" value="4" />
+            <label class="inline-label">
+              <span>Exclude Weekends</span>
+              <input type="checkbox" id="excludeWeekends" checked>
+            </label>
+            
+          </div>
+          <div style="flex: 1; min-width: 250px">
+            <label>Buffer before UAT (days)</label>
+            <input type="number" id="uatBuffer" value="5" />
+            <label>UAT Duration (days)</label>
+            <input type="number" id="uatDuration" value="10" />
+            <label>Deployment Buffer (days)</label>
+            <input type="number" id="deploymentBuffer" value="1" />
+            <label>Final Completion Buffer (days)</label>
+            <input type="number" id="finalBuffer" value="0" />
+          </div>
+        </div>
+        <div class="button-container">
+          <button type="button" onclick="calculate()">📅 Calculate</button>
+          <button onclick="saveData()">💾 Save</button>
+          <button onclick="loadData()">🔄 Load</button>
+          <button onclick="window.print()">🖨️ PDF</button>
+        </div>
+        <div id="results">
+          <h3>📊 Results Summary</h3>
+          <div id="resultsList"></div>
+        </div>
+      </section>
+    </main>
+    <script>
+      // Predefined Indian Holidays
+      const defaultHolidays = [
+        { date: "2025-01-26", name: "Republic Day" },
+        { date: "2025-03-14", name: "Holi" },
+        { date: "2025-08-15", name: "Independence Day" },
+        { date: "2025-10-02", name: "Gandhi Jayanti" }
+      ];
+
+      const suggestedHolidayNames = ["Republic Day", "Holi", "Eid", "Good Friday", "Independence Day", "Gandhi Jayanti", "Diwali", "Christmas", "Raksha Bandhan", "Janmashtami"];
+
+      function loadDefaultHolidays() {
+        const tbody = document.getElementById("holidaysBody");
+        tbody.innerHTML = "";
+        defaultHolidays.forEach((h) => addHolidayRow(h.date, h.name));
+      }
+
+      function addHolidayRow(date = "", name = "") {
+        const tbody = document.getElementById("holidaysBody");
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td><input type="date" value="${date}"></td>
+        <td>
+          <input list="holidayNames" type="text" value="${name}">
+          <datalist id="holidayNames">
+            ${suggestedHolidayNames.map((opt) => `<option value="${opt}">`).join("")}
+          </datalist>
+        </td>
+        <td><button type="button" onclick="removeHolidayRow(this)">Remove</button></td>
+      `;
+        tbody.appendChild(row);
+      }
+
+      function removeHolidayRow(btn) {
+        btn.closest("tr").remove();
+      }
+
+      async function fetchIndianHolidays() {
+        const year = document.getElementById('startDate').value.slice(0, 4) || new Date().getFullYear();
+        const url = `https://srkt10950.github.io/Holidays/holidays-${year}.json`;
+      
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('File not found');
+          const data = await response.json();
+      
+          const tbody = document.getElementById('holidaysBody');
+          tbody.innerHTML = "";
+          data.forEach(h => addHolidayRow(h.date, h.name));
+        } catch (err) {
+          console.error(err);
+          alert(`❌ Could not load holidays for ${year}. Please ensure the JSON file exists.`);
+        }
+      }
+      
+      function calculate() {
+        const startDateValue = document.getElementById("startDate").value;
+        if (!startDateValue) {
+          alert("Please select a start date.");
+          return;
+        }
+        const startDate = new Date(startDateValue);
+        const effort = parseFloat(document.getElementById("effort").value);
+        const dailyHours = parseFloat(document.getElementById("dailyHours").value);
+        const uatBuffer = parseInt(document.getElementById("uatBuffer").value);
+        const uatDuration = parseInt(document.getElementById("uatDuration").value);
+        const deploymentBuffer = parseInt(document.getElementById("deploymentBuffer").value);
+        const finalBuffer = parseInt(document.getElementById("finalBuffer").value);
+        const excludeWeekends = document.getElementById("excludeWeekends").checked;
+
+        const holidays = Array.from(document.querySelectorAll("#holidaysBody tr")).map((row) => new Date(row.cells[0].querySelector("input").value).toDateString());
+
+        const projectDays = Math.ceil(effort / dailyHours);
+
+        function addWorkdays(date, days) {
+          const result = new Date(date);
+          let added = 0;
+          while (added < days) {
+            result.setDate(result.getDate() + 1);
+            const isWeekend = result.getDay() === 0 || result.getDay() === 6;
+            const isHoliday = holidays.includes(result.toDateString());
+            if ((!excludeWeekends || !isWeekend) && !isHoliday) added++;
+          }
+          return result;
+        }
+
+        const completionDate = addWorkdays(startDate, projectDays);
+        const uatStartDate = addWorkdays(completionDate, uatBuffer);
+        const uatEndDate = addWorkdays(uatStartDate, uatDuration);
+        const deploymentDate = addWorkdays(uatEndDate, deploymentBuffer);
+        const finalCompletionDate = addWorkdays(deploymentDate, finalBuffer);
+
+        // Animated result transition
+        const resultsList = document.getElementById("resultsList");
+        resultsList.classList.add("fade-out");
+        setTimeout(() => {
+          resultsList.innerHTML = `
+          <div class="result-line"><div class="result-label">📌 Estimated Project Days</div><div class="result-value">${projectDays}</div></div>
+          <div class="result-line"><div class="result-label">📅 Estimated Completion Date</div><div class="result-value">${completionDate.toDateString()}</div></div>
+          <div class="result-line"><div class="result-label">🟢 UAT Start Date</div><div class="result-value">${uatStartDate.toDateString()}</div></div>
+          <div class="result-line"><div class="result-label">🔵 UAT End Date</div><div class="result-value">${uatEndDate.toDateString()}</div></div>
+          <div class="result-line"><div class="result-label">🚀 Deployment Date</div><div class="result-value">${deploymentDate.toDateString()}</div></div>
+          <div class="result-line"><div class="result-label">✅ Final Completion Date</div><div class="result-value">${finalCompletionDate.toDateString()}</div></div>
+        `;
+          resultsList.classList.remove("fade-out");
+        }, 300);
+      }
+
+      function saveData() {
+        const data = {
+          projectName: document.getElementById('projectName').value,
+          startDate: document.getElementById("startDate").value,
+          effort: document.getElementById("effort").value,
+          dailyHours: document.getElementById("dailyHours").value,
+          uatBuffer: document.getElementById("uatBuffer").value,
+          uatDuration: document.getElementById("uatDuration").value,
+          deploymentBuffer: document.getElementById("deploymentBuffer").value,
+          finalBuffer: document.getElementById("finalBuffer").value,
+          excludeWeekends: document.getElementById("excludeWeekends").checked,
+          holidays: Array.from(document.querySelectorAll("#holidaysBody tr")).map((row) => ({
+            date: row.cells[0].querySelector("input").value,
+            name: row.cells[1].querySelector("input").value
+          }))
+        };
+        localStorage.setItem("projectCalcData", JSON.stringify(data));
+        alert("✅ Data saved locally!");
+      }
+
+      function loadData() {
+        const data = JSON.parse(localStorage.getItem("projectCalcData"));
+        if (!data) return alert("⚠️ No saved data found.");
+        document.getElementById('projectName').value = data.projectName || "";
+        document.getElementById("startDate").value = data.startDate;
+        document.getElementById("effort").value = data.effort;
+        document.getElementById("dailyHours").value = data.dailyHours;
+        document.getElementById("uatBuffer").value = data.uatBuffer;
+        document.getElementById("uatDuration").value = data.uatDuration;
+        document.getElementById("deploymentBuffer").value = data.deploymentBuffer;
+        document.getElementById("finalBuffer").value = data.finalBuffer;
+        document.getElementById("excludeWeekends").checked = data.excludeWeekends;
+
+        const tbody = document.getElementById("holidaysBody");
+        tbody.innerHTML = "";
+        data.holidays.forEach((h) => addHolidayRow(h.date, h.name));
+      }
+
+      function exportHolidays() {
+        const holidays = Array.from(document.querySelectorAll("#holidaysBody tr")).map((row) => ({
+          date: row.cells[0].querySelector("input").value,
+          name: row.cells[1].querySelector("input").value
+        }));
+        const blob = new Blob([JSON.stringify(holidays, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "holidays.json";
+        a.click();
+      }
+
+      function importHolidays(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const holidays = JSON.parse(reader.result);
+          const tbody = document.getElementById("holidaysBody");
+          tbody.innerHTML = "";
+          holidays.forEach((h) => addHolidayRow(h.date, h.name));
+        };
+        reader.readAsText(file);
+      }
+
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+      }
+
+      window.onload = loadDefaultHolidays;
+    </script>
+  </body>
+</html>
